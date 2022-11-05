@@ -1,4 +1,5 @@
-// change by sam
+// checkpoint 1 code
+
 module fileops ();
 string filename,mode,command,s;
 integer address;
@@ -11,11 +12,6 @@ if ($value$plusargs ("filename=%s", filename))
 
 if ($value$plusargs ("mode=%s", mode))
 	$display ("Operating Mode : %s",mode);
-
-if (mode==="S")
-	$display ("Operating Mode ===s : %s",mode);
-if (mode==="SILENT")
-	$display ("Operating Mode ===SILENT : %s",mode);
 	
 	
 fd_r = $fopen (filename,"r");
@@ -28,9 +24,9 @@ while (!$feof(fd_r))
 begin
 	$fscanf (fd_r,"%s",command);
 	$fscanf (fd_r,"%h",address);
-	//$fgets (fd_r,"%s",content);
 	$display ("command: %d, address: %h",command,address);
 end
 $fclose (fd_r);	//closing file
 end
+
 endmodule : fileops

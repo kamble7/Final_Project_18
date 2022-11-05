@@ -1,0 +1,20 @@
+# Compile of fileops.sv was successful.
+vsim -voptargs=+acc work.fileops +filename=tracefile.txt +mode=normal
+# vsim -voptargs="+acc" work.fileops "+filename=tracefile.txt" "+mode=normal" 
+# Start time: 14:13:04 on Nov 05,2022
+# ** Note: (vsim-8009) Loading existing optimized design _opt
+# Loading sv_std.std
+# Loading work.fileops(fast)
+# ** Warning: (vsim-PLI-3691) Expected a system task, not a system function '$fscanf'.
+#    Time: 0 ns  Iteration: 0  Instance: /fileops File: //thoth.cecs.pdx.edu/Home04/bolade/Desktop/FALL 22/MSD 585/Proj/checkpoint1/Final_Project_18/fileops.sv Line: 25
+# ** Warning: (vsim-PLI-3691) Expected a system task, not a system function '$fscanf'.
+#    Time: 0 ns  Iteration: 0  Instance: /fileops File: //thoth.cecs.pdx.edu/Home04/bolade/Desktop/FALL 22/MSD 585/Proj/checkpoint1/Final_Project_18/fileops.sv Line: 26
+run -all
+# Input File_name : tracefile.txt
+# Operating Mode : normal
+# File tracefile.txt is opened successfully
+# command: 2, address: 00408ed4
+# command: 0, address: 10019d94
+# command: 2, address: 00408ed8
+# command: 1, address: 10019d88
+# command: 2, address: 00408edc
