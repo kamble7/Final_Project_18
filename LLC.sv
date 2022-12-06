@@ -1,12 +1,12 @@
 //vsim work.TraceHandler "+filename=tracefile.txt" "+mode=normal"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// LLC.sv - Last level cache
-//
-// Author:		Hemanth Kumar Bolade (bolade@pdx.edu), Samhitha Kamkanala (samhitha@pdx.edu), Kiran Kamble (kamble@pdx.edu)
-// Last modified:	01-Oct-2022
-//
-// Description: 8-way set associative L2 Cache (Last level cache) with Pseudo LRU replacement policy and MESI Coherency protocol. 
+// LLC.sv - Last level cache														      //
+//																	      //
+// Author:		Hemanth Kumar Bolade (bolade@pdx.edu), Samhitha Kamkanala (samhitha@pdx.edu), Kiran Kamble (kamble@pdx.edu)           //
+// Last modified:	06-Dec-2022                                                                                                           //
+//																	      //
+// Description: 8-way set associative L2 Cache (Last level cache) with Pseudo LRU replacement policy and MESI Coherency protocol. 	      //
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 `include "defines.sv";
