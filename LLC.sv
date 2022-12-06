@@ -24,7 +24,7 @@ logic [ADDR_BITS-1:0] trace_addr;
 logic [TAG_BITS-1:0] tag;
 logic [SET_BITS-1:0] index;
 logic [BYTE_OFFSET_BITS-1:0] byteselect;
-logic PLRU[SETS-1:0][WAYS-1:0];
+logic PLRU[SETS-1:0][PLRU_BITS-1:0];
 logic [TAG_BITS-1:0] TAG[SETS-1:0][WAYS-1:0] ;
 state_t MESI_STATE[SETS-1:0][WAYS-1:0];
 snp_rslt_t SnoopResult;
@@ -163,6 +163,8 @@ begin
 		cache_hits++;
 		MessageToCache(SENDLINE,addr);
 		UpdatePLRU(index,which_way);
+		//$display("\nupdatePLRU_which_way = %p\n",PLRU[index]);
+
 	end
 	else if (which_way == 8)
 	begin
@@ -175,10 +177,13 @@ begin
 			TAG[index][which_way] = tag;
 			MessageToCache(SENDLINE,addr) ;
 			UpdatePLRU(index,which_way);
+			//$display("\nupdatePLRU_which_way = %p\n",PLRU[index]);
+
 		end
 		else if (which_way == 8)
 		begin
 			which_way = GetPLRU(index);
+			//$display("\ngetPLRU_which_way = %d\n",which_way);
 			if (MESI_STATE[index][which_way] == M)
 			begin
 				MessageToCache(GETLINE,addr) ;
@@ -187,6 +192,8 @@ begin
 				BusOperation(READ,addr) ;
 				TAG[index][which_way] = tag;
 				UpdatePLRU(index,which_way);
+				//$display("\nupdatePLRU_which_way = %p\n",PLRU[index]);
+
 			end
 			else if (MESI_STATE[index][which_way] == S || MESI_STATE[index][which_way] == E)
 			begin
@@ -195,6 +202,8 @@ begin
 				TAG[index][which_way] = tag;
 				MessageToCache(SENDLINE,addr) ;
 				UpdatePLRU(index,which_way);
+				//$display("\nupdatePLRU_which_way = %p\n",PLRU[index]);
+
 			end
 		end
 		GetSnoopResult(addr);
@@ -374,7 +383,7 @@ int index,way;
 		begin
 			if (MESI_STATE[index][way] != I ) 
 			begin
-				$display ("index = %15b,way = %d, Tag= %b,State = %s",index,way,TAG[index][way],MESI_STATE[index][way]);
+				$display ("index = %15b,way = %0d, Tag= %b,State = %s",index,way,TAG[index][way],MESI_STATE[index][way]);
 			end
 		end
 	end		
@@ -431,21 +440,23 @@ task UpdatePLRU (int nindex, int nway);
 endtask : UpdatePLRU
 
 //******************************* TASK TO GET PLRU BITS ******************************//
-function GetPLRU (int nindex);
+function logic[PLRU_BITS-1:0] GetPLRU (int nindex);
 logic [PLRU_BITS-1:0] getlru;
 begin
-	if(PLRU[nindex][0] == 0)
+	//$display("\nupdatePLRU_which_way = %p\n",PLRU[index]);
+
+	if(PLRU[nindex][0] == 1'b0)
 	begin
-		if(PLRU[nindex][2] == 0)
+		if(PLRU[nindex][2] == 1'b0)
 		begin
-			if(PLRU[nindex][6] == 0)
+			if(PLRU[nindex][6] == 1'b0)
 				getlru = 'd7;
 			else
 				getlru = 'd6;
 		end
 		else 
 		begin
-			if(PLRU[nindex][5] == 0)
+			if(PLRU[nindex][5] == 1'b0)
 				getlru = 'd5;
 			else
 				getlru = 'd4;
@@ -453,22 +464,24 @@ begin
 	end
 	else
 	begin
-		if(PLRU[nindex][1] == 0)
+		if(PLRU[nindex][1] == 1'b0)
 		begin
-			if(PLRU[nindex][4] == 0)
+			if(PLRU[nindex][4] == 1'b0)
 				getlru = 'd3;
 			else
 				getlru = 'd2;
 		end
 		else 
 		begin
-			if(PLRU[nindex][3] == 0)
+			if(PLRU[nindex][3] == 1'b0)
 				getlru = 'd1;
 			else
 				getlru = 'd0;
 		end		
 	end
-	return getlru;
+		//$display("\ngetPLRU_func = %b\n",getlru);
+
+	GetPLRU = getlru;
 end
 endfunction : GetPLRU
 
