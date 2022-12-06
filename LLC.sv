@@ -41,7 +41,7 @@ integer invalid_way;
 assign tag = address[(BYTE_OFFSET_BITS+SET_BITS) +: TAG_BITS];
 assign index = address[BYTE_OFFSET_BITS +: SET_BITS];
 assign byteselect = address[BYTE_OFFSET_BITS-1 : 0];
-assign trace_addr = address[BYTE_OFFSET_BITS+: (SET_BITS+TAG_BITS)] << BYTE_OFFSET_BITS ;
+//assign trace_addr = address[BYTE_OFFSET_BITS+: (SET_BITS+TAG_BITS)] << BYTE_OFFSET_BITS ;
 
 initial
 begin
@@ -181,12 +181,14 @@ begin
 		else if (which_way == 8)
 		begin
 			which_way = GetPLRU(index);
-			//$display("\ngetPLRU_which_way = %d\n",which_way);
+			trace_addr = {TAG[index][which_way],index}<<BYTE_OFFSET_BITS;
+			
+			$display("addr= %h \ntrace_addr= %h\n",{TAG[index][which_way],index,6'b0},trace_addr);
 			if (MESI_STATE[index][which_way] == M)
 			begin
-				MessageToCache(GETLINE,addr) ;
-				BusOperation(WRITE,addr) ;
-				MessageToCache(EVICTLINE,addr) ;
+				MessageToCache(GETLINE,trace_addr) ;
+				BusOperation(WRITE,trace_addr) ;
+				MessageToCache(EVICTLINE,trace_addr) ;
 				BusOperation(READ,addr) ;
 				TAG[index][which_way] = tag;
 				UpdatePLRU(index,which_way);
@@ -195,13 +197,11 @@ begin
 			end
 			else if (MESI_STATE[index][which_way] == S || MESI_STATE[index][which_way] == E)
 			begin
-				MessageToCache(EVICTLINE,addr) ;
+				MessageToCache(EVICTLINE,trace_addr) ;
 				BusOperation(READ,addr) ;
 				TAG[index][which_way] = tag;
 				MessageToCache(SENDLINE,addr) ;
 				UpdatePLRU(index,which_way);
-				//$display("\nupdatePLRU_which_way = %p\n",PLRU[index]);
-
 			end
 		end
 		GetSnoopResult(addr);
@@ -245,11 +245,14 @@ begin
 	else if (which_way == 8)
 	begin
 		which_way = GetPLRU(index);
+		trace_addr = {TAG[index][which_way],index}<<BYTE_OFFSET_BITS;
+		$display("addr= %h \ntrace_addr= %h\n",{TAG[index][which_way],index,6'b0},trace_addr);
+		
 		if (MESI_STATE[index][invalid_way] == M)
 		begin
-			MessageToCache(GETLINE,addr);
-			BusOperation(WRITE,addr);
-			MessageToCache(EVICTLINE,addr);
+			MessageToCache(GETLINE,trace_addr);
+			BusOperation(WRITE,trace_addr);
+			MessageToCache(EVICTLINE,trace_addr);
 			BusOperation(RWIM,addr);
 			TAG[index][which_way] = tag;
 			MessageToCache(SENDLINE,addr);
@@ -258,7 +261,7 @@ begin
 		end
 		else if ((MESI_STATE[index][which_way] == S) || (MESI_STATE[index][which_way] == E))
 		begin
-			MessageToCache(EVICTLINE,addr);
+			MessageToCache(EVICTLINE,trace_addr);
 			BusOperation(RWIM,addr);
 			TAG[index][which_way] = tag;
 			MessageToCache(SENDLINE,addr);
@@ -381,7 +384,9 @@ int index,way;
 		begin
 			if (MESI_STATE[index][way] != I ) 
 			begin
-				$display ("index = %15b,way = %0d, Tag= %b,State = %s",index,way,TAG[index][way],MESI_STATE[index][way]);
+				logic [SET_BITS-1:0] pindex ;
+				pindex = index;
+				$display ("way = %0d, Tag= %h,index = %h, pindex=%h, addr = %h,State = %s",way,TAG[index][way],index,pindex,{TAG[index][way],pindex,6'b0},MESI_STATE[index][way]);
 			end
 		end
 	end		
@@ -477,7 +482,7 @@ begin
 				getlru = 'd0;
 		end		
 	end
-		//$display("\ngetPLRU_func = %b\n",getlru);
+		$display("\ngetPLRU_func = %d\n",getlru);
 
 	GetPLRU = getlru;
 end
