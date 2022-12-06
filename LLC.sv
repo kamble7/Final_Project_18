@@ -96,7 +96,50 @@ begin
 end
 endtask : MessageToCache
 	
+function int search_cache;
+begin
+	for (int way_cnt = 0; way_cnt<WAYS; way_cnt++)
+	begin
+			/*
+			$display ("Input address: %h, %b",address,address);
+			$display ("Input tag:%b, search_tag: %b",tag,TAG[index][way_cnt]);
+			$display ("Input index:%b, byte:%b",index,byteselect);
+			$display ("MESI: %s",MESI_STATE[index][way_cnt]);
+			*/
+		if ((MESI_STATE[index][way_cnt] != I) && (TAG[index][way_cnt] == tag))
+		begin
+			//$display ("way_cnt: %d",way_cnt);
+			search_cache = way_cnt;
+			break;
+		end
+		//$display ("way_cnt_8: %d",8);
+		search_cache = 8;
+	end
+	//$display ("way_cnt_8: %d",8);
+	//search_cache = 8;
+end
+endfunction : search_cache
 
+function int check_invalid;
+begin
+	for (int way_cnt = 0; way_cnt<WAYS; way_cnt++)
+	begin
+		if (MESI_STATE[index][way_cnt] == I)
+		begin
+			check_invalid = way_cnt;
+			//$display ("chk_inv_way_cnt_f: %d",way_cnt);
+
+			break;
+		end
+		//$display ("chk_inv_way_cnt_f8: %d",8);
+
+	check_invalid = 8;
+	end
+	//$display ("chk_inv_way_cnt_f8: %d",8);
+	//check_invalid = 8;
+end
+endfunction : check_invalid
+	
 task read_request_from_L1_data_cache(logic [ADDR_BITS-1:0] addr);
 begin
 	reads++;
@@ -112,7 +155,7 @@ begin
 	begin
 		cache_misses++;
 		which_way = check_invalid;
-	//$display("\ninvalid_which_way = %d\n",which_way);
+		//$display("\ninvalid_which_way = %d\n",which_way);
 		if (which_way != 8)
 		begin
 			BusOperation(READ,addr);
