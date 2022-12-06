@@ -64,7 +64,82 @@ begin
 	endcase
 end
 
+	
+task BusOperation(bus_op_t bus_op, logic [ADDR_BITS-1:0] addr);
+begin
+	GetSnoopResult(addr);
+	$display("BusOperation: %s, Address: %h, SnoopResult: %s",bus_op, addr, SnoopResult);
+end
+endtask : BusOperation
 
+task GetSnoopResult (logic [ADDR_BITS-1:0] addr);
+begin
+	bit [1:0] snoopbits;
+	assign snoopbits = addr[1:0];
+	case (snoopbits)
+		2'b00: SnoopResult = HIT;
+		2'b01: SnoopResult = HITM;
+		default:SnoopResult = NOHIT;
+	endcase
+end
+endtask : GetSnoopResult
+
+task PutSnoopResult(logic [ADDR_BITS-1:0] addr, snp_rslt_t snoop_result);
+begin
+	$display ("PutSnoopResult : Address = %h, snoop_result = %s", addr, snoop_result);
+end
+endtask : PutSnoopResult
+
+task MessageToCache(msg_to_cache_t msgL2L1, logic [ADDR_BITS-1:0] addr);
+begin
+	$display("L2 to L1 message: %s, Address: %h",msgL2L1,addr);
+end
+endtask : MessageToCache
+	
+function int search_cache;
+begin
+	for (int way_cnt = 0; way_cnt<WAYS; way_cnt++)
+	begin
+			/*
+			$display ("Input address: %h, %b",address,address);
+			$display ("Input tag:%b, search_tag: %b",tag,TAG[index][way_cnt]);
+			$display ("Input index:%b, byte:%b",index,byteselect);
+			$display ("MESI: %s",MESI_STATE[index][way_cnt]);
+			*/
+		if ((MESI_STATE[index][way_cnt] != I) && (TAG[index][way_cnt] == tag))
+		begin
+			//$display ("way_cnt: %d",way_cnt);
+			search_cache = way_cnt;
+			break;
+		end
+		//$display ("way_cnt_8: %d",8);
+		search_cache = 8;
+	end
+	//$display ("way_cnt_8: %d",8);
+	//search_cache = 8;
+end
+endfunction : search_cache
+
+function int check_invalid;
+begin
+	for (int way_cnt = 0; way_cnt<WAYS; way_cnt++)
+	begin
+		if (MESI_STATE[index][way_cnt] == I)
+		begin
+			check_invalid = way_cnt;
+			//$display ("chk_inv_way_cnt_f: %d",way_cnt);
+
+			break;
+		end
+		//$display ("chk_inv_way_cnt_f8: %d",8);
+
+	check_invalid = 8;
+	end
+	//$display ("chk_inv_way_cnt_f8: %d",8);
+	//check_invalid = 8;
+end
+endfunction : check_invalid
+	
 task read_request_from_L1_data_cache(logic [ADDR_BITS-1:0] addr);
 begin
 	reads++;
@@ -80,7 +155,7 @@ begin
 	begin
 		cache_misses++;
 		which_way = check_invalid;
-	//$display("\ninvalid_which_way = %d\n",which_way);
+		//$display("\ninvalid_which_way = %d\n",which_way);
 		if (which_way != 8)
 		begin
 			BusOperation(READ,addr);
@@ -119,6 +194,174 @@ begin
 end
 endtask : read_request_from_L1_data_cache
 
+task write_request_from_L1_data_cache(logic [ADDR_BITS-1:0] addr);
+begin
+	writes++;
+	which_way = search_cache;
+	if (which_way != 8)
+	begin
+		//if (MESI_STATE[index][hit_way] == M || MESI_STATE[index][hit_way] == E || MESI_STATE[index][hit_way] == S)
+		//begin
+			cache_hits++;
+			MessageToCache(SENDLINE,addr);
+			//MessageToCache(GETLINE,addr);
+			UpdatePLRU(index,which_way);
+			if (MESI_STATE[index][which_way] == S)
+				BusOperation(INVALIDATE,addr);
+		//end
+	end
+	else if (which_way == 8)
+	cache_misses++;
+	which_way = check_invalid;
+	if (which_way != 8)
+	begin
+		BusOperation(RWIM,addr);
+		TAG[index][which_way] = tag;
+		MessageToCache(SENDLINE,addr);
+		//MessageToCache(GETLINE,addr);
+		UpdatePLRU (index,which_way);
+	end
+	else if (which_way == 8)
+	begin
+		which_way = GetPLRU(index);
+		if (MESI_STATE[index][invalid_way] == M)
+		begin
+			MessageToCache(GETLINE,addr);
+			BusOperation(WRITE,addr);
+			MessageToCache(EVICTLINE,addr);
+			BusOperation(RWIM,addr);
+			TAG[index][which_way] = tag;
+			MessageToCache(SENDLINE,addr);
+			//MessageToCache(GETLINE,addr);
+			UpdatePLRU(index,which_way);
+		end
+		else if ((MESI_STATE[index][which_way] == S) || (MESI_STATE[index][which_way] == E))
+		begin
+			MessageToCache(EVICTLINE,addr);
+			BusOperation(RWIM,addr);
+			TAG[index][which_way] = tag;
+			MessageToCache(SENDLINE,addr);
+			//MessageToCache(GETLINE,addr);
+			UpdatePLRU(index,which_way);
+		end
+	end
+	MESI_STATE[index][which_way] = M;
+end
+endtask : write_request_from_L1_data_cache
+	
+task snooped_invalidate_request(logic [ADDR_BITS-1:0] addr);
+begin
+	which_way = search_cache;
+	if ((which_way != 8) && (MESI_STATE[index][which_way] == S))
+	begin
+		//if (MESI_STATE[index][which_way] == M || MESI_STATE[index][which_way] == E || MESI_STATE[index][which_way] == S)
+		//if (MESI_STATE[index][which_way] == S)
+		//begin
+			MESI_STATE[index][which_way] = I ;
+			PutSnoopResult(addr, HIT);
+			MessageToCache(INVALIDATELINE,addr);
+		//end
+	end
+	else if (which_way == 8)
+	begin
+		PutSnoopResult(addr, NOHIT);
+	end
+end
+endtask : snooped_invalidate_request
+
+task snooped_read_request(logic [ADDR_BITS-1:0] addr);
+begin
+	which_way = search_cache;
+	if (which_way != 8)
+	begin
+		if (MESI_STATE[index][which_way] == M)
+		begin
+			PutSnoopResult(addr, HITM);
+			MessageToCache(GETLINE,addr);
+			BusOperation(WRITE,addr);
+			MESI_STATE[index][which_way] = S;
+		end
+		else if (MESI_STATE[index][which_way] == E)
+		begin
+			PutSnoopResult(addr, HIT);
+			MESI_STATE[index][which_way] = S;
+		end
+		else if (MESI_STATE[index][which_way] == S)
+		begin
+			PutSnoopResult(addr, HIT);
+		end
+	end
+	else if (which_way == 8)
+	begin
+		PutSnoopResult(addr, NOHIT);
+	end
+end
+endtask : snooped_read_request
+
+//snoop_write
+task snooped_write_request (logic [ADDR_BITS-1:0] addr);
+begin
+	// Nothing to be DONE
+end
+endtask
+
+task snooped_read_with_intent_to_modify_request(logic [ADDR_BITS-1:0] addr);
+begin
+	which_way = search_cache;
+	if (which_way != 8)
+	begin
+		if (MESI_STATE[index][which_way] == M)
+		begin
+			PutSnoopResult(addr,HITM);
+			MessageToCache(GETLINE,addr);
+			BusOperation(WRITE,addr);
+			MESI_STATE[index][which_way] = I;
+			MessageToCache(INVALIDATELINE,addr);			
+		end
+		else if (MESI_STATE[index][which_way] == E || MESI_STATE[index][which_way] == S)
+		begin
+			PutSnoopResult(addr,HIT);
+			MESI_STATE[index][which_way] = I;
+			MessageToCache(INVALIDATELINE,addr);
+			end
+	end
+	else if (which_way == 8) 
+	begin	
+		PutSnoopResult(addr,NOHIT);
+	end
+end
+endtask : snooped_read_with_intent_to_modify_request
+	
+task clear_cache;
+begin
+	for(int index_cnt = 0; index_cnt < SETS; index_cnt++) 
+	begin
+		for(int way_cnt = 0; way_cnt < WAYS; way_cnt++) 
+		begin
+			MESI_STATE[index_cnt][way_cnt] = I;
+			//$display ("MESI_STATE = %s", MESI_STATE[index_cnt][way_cnt]);
+			//TAG[index_cnt][way_cnt] = 'b0;
+		end
+	end	
+end
+endtask : clear_cache
+
+task print_contents_and_state_of_each_valid_cache_line;
+begin
+int index,way;
+	for (index = 0;index<SETS; index++)
+	begin
+		for (way = 0;way<WAYS; way++)
+		begin
+			if (MESI_STATE[index][way] != I ) 
+			begin
+				$display ("index = %15b,way = %d, Tag= %b,State = %s",index,way,TAG[index][way],MESI_STATE[index][way]);
+			end
+		end
+	end		
+end
+endtask : print_contents_and_state_of_each_valid_cache_line
+	
 //---------------------------------------------
 //PLRU
 //---------------------------------------------
@@ -167,7 +410,6 @@ task UpdatePLRU (int nindex, int nway);
 	endcase
 endtask : UpdatePLRU
 
-
 function GetPLRU (int nindex);
 logic [PLRU_BITS-1:0] getlru;
 begin
@@ -208,7 +450,6 @@ begin
 	return getlru;
 end
 endfunction : GetPLRU
-
 
 //---------------------------------------------
 endmodule : LLC
