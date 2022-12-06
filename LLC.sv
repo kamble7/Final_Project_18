@@ -151,6 +151,60 @@ begin
 end
 endtask : read_request_from_L1_data_cache
 
+task write_request_from_L1_data_cache(logic [ADDR_BITS-1:0] addr);
+begin
+	writes++;
+	which_way = search_cache;
+	if (which_way != 8)
+	begin
+		//if (MESI_STATE[index][hit_way] == M || MESI_STATE[index][hit_way] == E || MESI_STATE[index][hit_way] == S)
+		//begin
+			cache_hits++;
+			MessageToCache(SENDLINE,addr);
+			//MessageToCache(GETLINE,addr);
+			UpdatePLRU(index,which_way);
+			if (MESI_STATE[index][which_way] == S)
+				BusOperation(INVALIDATE,addr);
+		//end
+	end
+	else if (which_way == 8)
+	cache_misses++;
+	which_way = check_invalid;
+	if (which_way != 8)
+	begin
+		BusOperation(RWIM,addr);
+		TAG[index][which_way] = tag;
+		MessageToCache(SENDLINE,addr);
+		//MessageToCache(GETLINE,addr);
+		UpdatePLRU (index,which_way);
+	end
+	else if (which_way == 8)
+	begin
+		which_way = GetPLRU(index);
+		if (MESI_STATE[index][invalid_way] == M)
+		begin
+			MessageToCache(GETLINE,addr);
+			BusOperation(WRITE,addr);
+			MessageToCache(EVICTLINE,addr);
+			BusOperation(RWIM,addr);
+			TAG[index][which_way] = tag;
+			MessageToCache(SENDLINE,addr);
+			//MessageToCache(GETLINE,addr);
+			UpdatePLRU(index,which_way);
+		end
+		else if ((MESI_STATE[index][which_way] == S) || (MESI_STATE[index][which_way] == E))
+		begin
+			MessageToCache(EVICTLINE,addr);
+			BusOperation(RWIM,addr);
+			TAG[index][which_way] = tag;
+			MessageToCache(SENDLINE,addr);
+			//MessageToCache(GETLINE,addr);
+			UpdatePLRU(index,which_way);
+		end
+	end
+	MESI_STATE[index][which_way] = M;
+end
+endtask : write_request_from_L1_data_cache
 	
 task snooped_invalidate_request(logic [ADDR_BITS-1:0] addr);
 begin
@@ -201,16 +255,12 @@ begin
 end
 endtask : snooped_read_request
 
-
-
-
 //snoop_write
 task snooped_write_request (logic [ADDR_BITS-1:0] addr);
 begin
 	// Nothing to be DONE
 end
 endtask
-
 
 task snooped_read_with_intent_to_modify_request(logic [ADDR_BITS-1:0] addr);
 begin
@@ -269,8 +319,6 @@ int index,way;
 end
 endtask : print_contents_and_state_of_each_valid_cache_line
 	
-	
-	
 //---------------------------------------------
 //PLRU
 //---------------------------------------------
@@ -319,7 +367,6 @@ task UpdatePLRU (int nindex, int nway);
 	endcase
 endtask : UpdatePLRU
 
-
 function GetPLRU (int nindex);
 logic [PLRU_BITS-1:0] getlru;
 begin
@@ -360,7 +407,6 @@ begin
 	return getlru;
 end
 endfunction : GetPLRU
-
 
 //---------------------------------------------
 endmodule : LLC
