@@ -232,41 +232,42 @@ begin
 		//end
 	end
 	else if (which_way == 8)
-	cache_misses++;
-	which_way = check_invalid;
-	if (which_way != 8)
 	begin
-		BusOperation(RWIM,addr);
-		TAG[index][which_way] = tag;
-		MessageToCache(SENDLINE,addr);
-		//MessageToCache(GETLINE,addr);
-		UpdatePLRU (index,which_way);
-	end
-	else if (which_way == 8)
-	begin
-		which_way = GetPLRU(index);
-		trace_addr = {TAG[index][which_way],index}<<BYTE_OFFSET_BITS;
-		$display("addr= %h \ntrace_addr= %h\n",{TAG[index][which_way],index,6'b0},trace_addr);
-		
-		if (MESI_STATE[index][invalid_way] == M)
+		cache_misses++;
+		which_way = check_invalid;
+		if (which_way != 8)
 		begin
-			MessageToCache(GETLINE,trace_addr);
-			BusOperation(WRITE,trace_addr);
-			MessageToCache(EVICTLINE,trace_addr);
 			BusOperation(RWIM,addr);
 			TAG[index][which_way] = tag;
 			MessageToCache(SENDLINE,addr);
 			//MessageToCache(GETLINE,addr);
-			UpdatePLRU(index,which_way);
+			UpdatePLRU (index,which_way);
 		end
-		else if ((MESI_STATE[index][which_way] == S) || (MESI_STATE[index][which_way] == E))
+		else if (which_way == 8)
 		begin
-			MessageToCache(EVICTLINE,trace_addr);
-			BusOperation(RWIM,addr);
-			TAG[index][which_way] = tag;
-			MessageToCache(SENDLINE,addr);
-			//MessageToCache(GETLINE,addr);
-			UpdatePLRU(index,which_way);
+			which_way = GetPLRU(index);
+			trace_addr = {TAG[index][which_way],index}<<BYTE_OFFSET_BITS;
+			$display("addr= %h \ntrace_addr= %h\n",{TAG[index][which_way],index,6'b0},trace_addr);
+			if (MESI_STATE[index][which_way] == M)
+			begin
+				MessageToCache(GETLINE,trace_addr);
+				BusOperation(WRITE,trace_addr);
+				MessageToCache(EVICTLINE,trace_addr);
+				BusOperation(RWIM,addr);
+				TAG[index][which_way] = tag;
+				MessageToCache(SENDLINE,addr);
+				//MessageToCache(GETLINE,addr);
+				UpdatePLRU(index,which_way);
+			end
+			else if ((MESI_STATE[index][which_way] == S) || (MESI_STATE[index][which_way] == E))
+			begin
+				MessageToCache(EVICTLINE,trace_addr);
+				BusOperation(RWIM,addr);
+				TAG[index][which_way] = tag;
+				MessageToCache(SENDLINE,addr);
+				//MessageToCache(GETLINE,addr);
+				UpdatePLRU(index,which_way);
+			end
 		end
 	end
 	MESI_STATE[index][which_way] = M;
