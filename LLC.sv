@@ -33,11 +33,9 @@ bit tag_hit;
 bit tag_miss;
 
 integer which_way;
-
 integer hit_way;
 integer invalid_way;
 //integer way_cnt;
-
 //cmd_t cmd;
 
 assign tag = address[(BYTE_OFFSET_BITS+SET_BITS) +: TAG_BITS];
@@ -79,7 +77,7 @@ begin
 end
 endtask : BusOperation
 
-//******************************* GET SNOOP RESULTS ******************************//
+//***************************** GET SNOOP RESULTS ***************************//
 task GetSnoopResult (logic [ADDR_BITS-1:0] addr);
 begin
 	bit [1:0] snoopbits;
@@ -99,7 +97,7 @@ begin
 end
 endtask : PutSnoopResult
 
-//******************************* MESSAGE from L2 to L2 CACHE ******************************//
+//************************** MESSAGE from L2 to L2 CACHE *************************//
 task MessageToCache(msg_to_cache_t msgL2L1, logic [ADDR_BITS-1:0] addr);
 begin
 	$display("L2 to L1 message: %s, Address: %h",msgL2L1,addr);
