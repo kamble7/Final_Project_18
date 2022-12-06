@@ -1,7 +1,14 @@
 //vsim work.TraceHandler "+filename=tracefile.txt" "+mode=normal"
-//--------------------------------------------------------------------------------------------------------------------------------
-//LLC
-//--------------------------------------------------------------------------------------------------------------------------------
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// LLC.sv - Last level cache														      //
+//																	      //
+// Author:		Hemanth Kumar Bolade (bolade@pdx.edu), Samhitha Kamkanala (samhitha@pdx.edu), Kiran Kamble (kamble@pdx.edu)           //
+// Last modified:	06-Dec-2022                                                                                                           //
+//																	      //
+// Description: 8-way set associative L2 Cache (Last level cache) with Pseudo LRU replacement policy and MESI Coherency protocol. 	      //
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 `include "defines.sv";
 
 module LLC (
@@ -60,11 +67,11 @@ begin
 		6:	snooped_read_with_intent_to_modify_request(address);
 		8:	clear_cache;
 		9:	print_contents_and_state_of_each_valid_cache_line;
-		default: ;
+	  default: ;
 	endcase
 end
 
-	
+//******************************* BUS OPERAION ******************************//
 task BusOperation(bus_op_t bus_op, logic [ADDR_BITS-1:0] addr);
 begin
 	GetSnoopResult(addr);
@@ -72,6 +79,7 @@ begin
 end
 endtask : BusOperation
 
+//******************************* GET SNOOP RESULTS ******************************//
 task GetSnoopResult (logic [ADDR_BITS-1:0] addr);
 begin
 	bit [1:0] snoopbits;
@@ -84,18 +92,21 @@ begin
 end
 endtask : GetSnoopResult
 
+//******************************* PUT SNOOP RESULTS ******************************//
 task PutSnoopResult(logic [ADDR_BITS-1:0] addr, snp_rslt_t snoop_result);
 begin
 	$display ("PutSnoopResult : Address = %h, snoop_result = %s", addr, snoop_result);
 end
 endtask : PutSnoopResult
 
+//******************************* MESSAGE from L2 to L2 CACHE ******************************//
 task MessageToCache(msg_to_cache_t msgL2L1, logic [ADDR_BITS-1:0] addr);
 begin
 	$display("L2 to L1 message: %s, Address: %h",msgL2L1,addr);
 end
 endtask : MessageToCache
-	
+
+//******************************* SEARCH CACHE ******************************//
 function int search_cache;
 begin
 	for (int way_cnt = 0; way_cnt<WAYS; way_cnt++)
@@ -120,6 +131,7 @@ begin
 end
 endfunction : search_cache
 
+//******************************* CHECK INVALID ******************************//
 function int check_invalid;
 begin
 	for (int way_cnt = 0; way_cnt<WAYS; way_cnt++)
@@ -139,7 +151,8 @@ begin
 	//check_invalid = 8;
 end
 endfunction : check_invalid
-	
+
+//******************************* READ TASK ******************************//
 task read_request_from_L1_data_cache(logic [ADDR_BITS-1:0] addr);
 begin
 	reads++;
@@ -194,6 +207,7 @@ begin
 end
 endtask : read_request_from_L1_data_cache
 
+//******************************* WRITE TASK ******************************//
 task write_request_from_L1_data_cache(logic [ADDR_BITS-1:0] addr);
 begin
 	writes++;
@@ -248,7 +262,8 @@ begin
 	MESI_STATE[index][which_way] = M;
 end
 endtask : write_request_from_L1_data_cache
-	
+
+//******************************* SNOOP INVALIDATE TASK ******************************//
 task snooped_invalidate_request(logic [ADDR_BITS-1:0] addr);
 begin
 	which_way = search_cache;
@@ -269,6 +284,7 @@ begin
 end
 endtask : snooped_invalidate_request
 
+//******************************* SNOOP READ TASK ******************************//
 task snooped_read_request(logic [ADDR_BITS-1:0] addr);
 begin
 	which_way = search_cache;
@@ -298,13 +314,14 @@ begin
 end
 endtask : snooped_read_request
 
-//snoop_write
+//******************************* SNOOP WRITE TASK ******************************//
 task snooped_write_request (logic [ADDR_BITS-1:0] addr);
 begin
 	// Nothing to be DONE
 end
 endtask
 
+//******************************* SNOOP RWIM - Read with intent to modify TASK ******************************//
 task snooped_read_with_intent_to_modify_request(logic [ADDR_BITS-1:0] addr);
 begin
 	which_way = search_cache;
@@ -331,7 +348,8 @@ begin
 	end
 end
 endtask : snooped_read_with_intent_to_modify_request
-	
+
+//******************************* TASK TO CLEAR THE CACHE ******************************//
 task clear_cache;
 begin
 	for(int index_cnt = 0; index_cnt < SETS; index_cnt++) 
@@ -346,6 +364,7 @@ begin
 end
 endtask : clear_cache
 
+//******************************* TASK TO PRINT CONTENTS & STATES OF EACH VALID CACHE LINE ******************************//	
 task print_contents_and_state_of_each_valid_cache_line;
 begin
 int index,way;
@@ -362,9 +381,10 @@ int index,way;
 end
 endtask : print_contents_and_state_of_each_valid_cache_line
 	
-//---------------------------------------------
-//PLRU
-//---------------------------------------------
+//---------------------------------------------//
+//		       PLRU                    //
+//---------------------------------------------//
+//******************************* TASK TO UPDATE PLRU BITS ******************************//
 task UpdatePLRU (int nindex, int nway);
 	case (nway)
 		0:	begin
@@ -410,6 +430,7 @@ task UpdatePLRU (int nindex, int nway);
 	endcase
 endtask : UpdatePLRU
 
+//******************************* TASK TO GET PLRU BITS ******************************//
 function GetPLRU (int nindex);
 logic [PLRU_BITS-1:0] getlru;
 begin
@@ -451,6 +472,6 @@ begin
 end
 endfunction : GetPLRU
 
-//---------------------------------------------
+//-------------------------------------------------------------------------------------------------------------------------------//
 endmodule : LLC
-//--------------------------------------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------------------------------------//
