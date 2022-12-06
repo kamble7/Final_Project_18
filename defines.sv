@@ -28,4 +28,4 @@ parameter CMDSIZE  = 4;                                                         
 typedef enum bit[1:0] {M,E,S,I}state_t;                                               // MESI
 typedef enum bit[1:0] {NOHIT, HIT, HITM}snp_rslt_t;                                   // Snoop Results
 typedef enum bit[2:0] {READ=3'b1, WRITE, INVALIDATE, RWIM}bus_op_t;                   // Bus Operation
-typedef enum bit[2:0] {GETLINE,SENDLINE,INVALIDATELINE,EVICTLINE} msg_to_cache_t;     // L2 to L1 message types
+typedef enum bit[2:0] {GETLINE=3'b1,SENDLINE,INVALIDATELINE,EVICTLINE} msg_to_cache_t;     // L2 to L1 message types
