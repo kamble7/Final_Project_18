@@ -31,7 +31,6 @@ LLC llc_inst(.command(command),
 				.mode(mode_b),
         .eof(eof));
 
-assign cache_hit_ratio = (cache_hits * 100)/(cache_hits+cache_misses);
 
 initial
 begin
@@ -66,13 +65,13 @@ begin
 	begin
 		trace = $fscanf (fd_r,"%h",address);
 		eof = 1;
-		$display ("\n\ncommand: %d, address: %h",command,address);
-		//#10	$display (" tag_hit : %d, tag_miss: %d, hit_way: %d, invalid_way: %d,\ntag is %b, Index is %b , byteselect is %b",llc_inst.tag_hit,llc_inst.tag_miss,llc_inst.hit_way,llc_inst.invalid_way,llc_inst.tag, llc_inst.index , llc_inst.byteselect);
-		//#10	$display (" which_way : %d, \ntag is %b, Index is %b , byteselect is %b",llc_inst.which_way,llc_inst.tag, llc_inst.index , llc_inst.byteselect);
-		#10	$display ("reads: %0d, writes: %0d, cache_hits: %0d, cache_misses: %0d, cache_hit_ratio: %.3f%%",reads,writes,cache_hits,cache_misses,cache_hit_ratio);
+		//$display ("\n\ncommand: %d, address: %h",command,address);
+		#10	cache_hit_ratio = (cache_hits/(cache_hits+cache_misses)) * 100;
+		$display ("reads: %0d, writes: %0d, cache_hits: %0d, cache_misses: %0d, cache_hit_ratio: %.3f%%",reads,writes,cache_hits,cache_misses,cache_hit_ratio);
 	end
 	else 
 	begin
+		eof = 1;
 		//command = 'dz;
 		address = 'dz;
 	end
