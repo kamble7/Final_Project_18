@@ -58,9 +58,9 @@ end
 always_ff @(posedge eof)
 begin
 	case (command)
-		0:	read_request_from_L1_data_cache(address);
+		0:	read_request_from_L1_data_or_instruction_cache(address);
 		1:	write_request_from_L1_data_cache(address);
-		2:	read_request_from_L1_data_cache(address);
+		2:	read_request_from_L1_data_or_instruction_cache(address);
 		3:	snooped_invalidate_request(address);
 		4:	snooped_read_request(address);
 		5:	snooped_write_request(address);
@@ -162,7 +162,7 @@ end
 endfunction : check_invalid
 
 //******************************* READ TASK ******************************//
-task read_request_from_L1_data_cache(logic [ADDR_BITS-1:0] addr);
+task read_request_from_L1_data_or_instruction_cache(logic [ADDR_BITS-1:0] addr);
 begin
 	reads++;
 	which_way = search_cache;
