@@ -78,7 +78,7 @@ begin
 end
 eof = 0;
 $display ("\n//----------------------------------STATISTICS--------------------------------------//");
-$display ("//reads: %0d, writes: %0d, cache_hits: %0d, cache_misses: %0d, cache_hit_ratio: %.2f//",reads,writes,cache_hits,cache_misses,cache_hit_ratio);
+$display ("//reads: %0d, writes: %0d, cache_hits: %0d, cache_misses: %0d, cache_hit_ratio: %.2f //",reads,writes,cache_hits,cache_misses,cache_hit_ratio);
 $display ("//----------------------------------------------------------------------------------//");
 
 $fclose (fd_r);	//closing file
