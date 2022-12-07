@@ -4,7 +4,7 @@
 // LLC.sv - Last level cache														      //
 //																	      //
 // Author:		Hemanth Kumar Bolade (bolade@pdx.edu), Samhitha Kankanala (samhitha@pdx.edu), Kiran Kamble (kamble@pdx.edu)           //
-// Last modified:	06-Dec-2022                                                                                                           //
+// Last modified:	07-Dec-2022                                                                                                           //
 //																	      //
 // Description: 8-way set associative L2 Cache (Last level cache) with Pseudo LRU replacement policy and MESI Coherency protocol. 	      //
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
