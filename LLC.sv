@@ -48,6 +48,8 @@ end
 
 always_ff @(posedge eof)
 begin
+	//if (mode == 0)
+	//	$display("\n//Trace_CMD: %0d, Trace_ADDR: %h", command,address);
 	case (command)
 		0:	read_request_from_L1_data_or_instruction_cache(address);
 		1:	write_request_from_L1_data_cache(address);

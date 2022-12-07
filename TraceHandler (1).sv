@@ -35,11 +35,11 @@ LLC llc_inst(.command(command),
 initial
 begin
 if ($value$plusargs ("filename=%s", filename))
-	$display ("Input File_name : %s",filename);
+	//$display ("Input File_name : %s",filename);
 
 if ($value$plusargs ("mode=%s", mode))
 begin
-	$display ("Operating Mode : %s",mode);
+	//$display ("Operating Mode : %s",mode);
 	if (mode.tolower == "normal")
 		mode_b = 0;
 	else if (mode.tolower == "silent")
@@ -52,13 +52,18 @@ begin
 end
 	
 fd_r = $fopen (filename,"r");
-if (fd_r)
-	$display ("File %s is opened successfully", filename);
-else
+if (!fd_r)
 begin
 	$display ("File %s is NOT opened successfully", filename);
 	$stop;
 end
+/*	//$display ("File %s is opened successfully", filename);
+//else
+begin
+	$display ("File %s is NOT opened successfully", filename);
+	$stop;
+end
+*/
 	
 while (!$feof(fd_r))
 begin
@@ -67,11 +72,15 @@ begin
 	if (trace > 0)
 	begin
 		eof = 1;
-		#10	cache_hit_ratio = (cache_hits/(cache_hits+cache_misses)) * 100;
-		$display ("reads: %0d, writes: %0d, cache_hits: %0d, cache_misses: %0d, cache_hit_ratio: %.3f%%\n",reads,writes,cache_hits,cache_misses,cache_hit_ratio);
+		#10	cache_hit_ratio = (cache_hits/(cache_hits+cache_misses));
+		//$display ("reads: %0d, writes: %0d, cache_hits: %0d, cache_misses: %0d, cache_hit_ratio: %.2f\n",reads,writes,cache_hits,cache_misses,cache_hit_ratio);
 	end
 end
 eof = 0;
+$display ("\n//----------------------------------STATISTICS--------------------------------------//");
+$display ("//reads: %0d, writes: %0d, cache_hits: %0d, cache_misses: %0d, cache_hit_ratio: %.2f//",reads,writes,cache_hits,cache_misses,cache_hit_ratio);
+$display ("//----------------------------------------------------------------------------------//");
+
 $fclose (fd_r);	//closing file
 end
 
