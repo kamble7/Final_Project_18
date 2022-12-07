@@ -55,7 +55,10 @@ fd_r = $fopen (filename,"r");
 if (fd_r)
 	$display ("File %s is opened successfully", filename);
 else
+begin
 	$display ("File %s is NOT opened successfully", filename);
+	$stop;
+end
 	
 while (!$feof(fd_r))
 begin
@@ -67,7 +70,7 @@ begin
 		eof = 1;
 		//$display ("\n\ncommand: %d, address: %h",command,address);
 		#10	cache_hit_ratio = (cache_hits/(cache_hits+cache_misses)) * 100;
-		$display ("reads: %0d, writes: %0d, cache_hits: %0d, cache_misses: %0d, cache_hit_ratio: %.3f%%",reads,writes,cache_hits,cache_misses,cache_hit_ratio);
+		$display ("reads: %0d, writes: %0d, cache_hits: %0d, cache_misses: %0d, cache_hit_ratio: %.3f%%\n",reads,writes,cache_hits,cache_misses,cache_hit_ratio);
 	end
 	else 
 	begin

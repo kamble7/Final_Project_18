@@ -390,6 +390,7 @@ endtask : clear_cache
 task print_contents_and_state_of_each_valid_cache_line;
 begin
 int index,way;
+	$display ("//--------- CMD 9, ALL VALIDS SUMMARY-----------//");
 	for (index = 0;index<SETS; index++)
 	begin
 		for (way = 0;way<WAYS; way++)
@@ -402,6 +403,8 @@ int index,way;
 			end
 		end
 	end		
+	$display ("//----------------------------------------------//");
+
 end
 endtask : print_contents_and_state_of_each_valid_cache_line
 	
