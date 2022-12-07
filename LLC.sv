@@ -12,13 +12,14 @@
 `include "defines.sv";
 
 module LLC (
+input logic [CMDSIZE-1:0] command,
+input logic [ADDR_BITS-1:0] address,
+input bit mode,
+input bit eof,
 output integer reads,
 output integer writes,
 output real cache_hits,
-output real cache_misses,
-input logic [CMDSIZE-1:0] command,
-input logic [ADDR_BITS-1:0] address,
-input bit mode
+output real cache_misses
 );
 
 logic [ADDR_BITS-1:0] trace_addr;
@@ -46,7 +47,7 @@ assign byteselect = address[BYTE_OFFSET_BITS-1 : 0];
 
 initial
 begin
-	$display("BYTE_OFFSET_BITS: %d,\n WAY_BITS: %d,\n SETS	: %d,\n SET_BITS: %d,\n TAG_BITS : %d,\n PLRU_BITS	: %d,\n ",BYTE_OFFSET_BITS,WAY_BITS,SETS,SET_BITS,TAG_BITS,PLRU_BITS);
+	//$display("BYTE_OFFSET_BITS: %d,\n WAY_BITS: %d,\n SETS	: %d,\n SET_BITS: %d,\n TAG_BITS : %d,\n PLRU_BITS	: %d,\n ",BYTE_OFFSET_BITS,WAY_BITS,SETS,SET_BITS,TAG_BITS,PLRU_BITS);
 	clear_cache;
 	reads = 0;
 	writes = 0;
@@ -54,7 +55,7 @@ begin
 	cache_misses = 0;
 end
 
-always_comb
+always_ff @(posedge eof)
 begin
 	case (command)
 		0:	read_request_from_L1_data_cache(address);
@@ -76,7 +77,7 @@ begin
 	GetSnoopResult(addr);
 	if (mode == 0)
 	begin
-		$display("BusOperation: %s, Address: %h, SnoopResult: %s",bus_op, addr, SnoopResult);
+	$display("BusOperation: %s, Address: %h, SnoopResult: %s",bus_op, addr, SnoopResult);
 	end
 end
 endtask : BusOperation
@@ -98,8 +99,8 @@ endtask : GetSnoopResult
 task PutSnoopResult(logic [ADDR_BITS-1:0] addr, snp_rslt_t snoop_result);
 begin
 	if (mode == 0)
-	begin
-		$display ("PutSnoopResult : Address = %h, snoop_result = %s", addr, snoop_result);
+begin
+	$display ("PutSnoopResult : Address = %h, snoop_result = %s", addr, snoop_result);
 	end
 end
 endtask : PutSnoopResult
@@ -109,7 +110,7 @@ task MessageToCache(msg_to_cache_t msgL2L1, logic [ADDR_BITS-1:0] addr);
 begin
 	if (mode == 0)
 	begin
-		$display("L2 to L1 message: %s, Address: %h",msgL2L1,addr);
+	$display("L2 to L1 message: %s, Address: %h",msgL2L1,addr);
 	end
 end
 endtask : MessageToCache
@@ -500,5 +501,5 @@ end
 endfunction : GetPLRU
 
 //-------------------------------------------------------------------------------------------------------------------------------//
-endmodule : LLC 
+endmodule : LLC
 //-------------------------------------------------------------------------------------------------------------------------------//
