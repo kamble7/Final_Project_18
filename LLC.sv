@@ -194,7 +194,7 @@ begin
 			which_way = GetPLRU(index);
 			trace_addr = {TAG[index][which_way],index}<<BYTE_OFFSET_BITS;
 			
-			$display("addr= %h \ntrace_addr= %h\n",{TAG[index][which_way],index,6'b0},trace_addr);
+			//$display("addr= %h \ntrace_addr= %h\n",{TAG[index][which_way],index,6'b0},trace_addr);
 			if (MESI_STATE[index][which_way] == M)
 			begin
 				MessageToCache(GETLINE,trace_addr) ;
