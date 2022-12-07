@@ -45,7 +45,7 @@ begin
 		mode_b = 1;
 	else
 	begin
-		$display ("Invalid mode");
+		$display ("**** Invalid mode ****");
 		$stop;
 	end
 end
