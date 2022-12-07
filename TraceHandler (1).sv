@@ -2,7 +2,7 @@
 // Trace file handling
 //--------------------------------------------------------------------------------------------------------------------------------
 //																	      //
-// Author:		Hemanth Kumar Bolade (bolade@pdx.edu), Samhitha Kamkanala (samhitha@pdx.edu), Kiran Kamble (kamble@pdx.edu)           //
+// Author:		Hemanth Kumar Bolade (bolade@pdx.edu), Samhitha Kankanala (samhitha@pdx.edu), Kiran Kamble (kamble@pdx.edu)           //
 // Last modified:	06-Dec-2022                                                                                                           //
 //																	      //
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
