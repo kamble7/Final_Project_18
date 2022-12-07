@@ -63,20 +63,12 @@ end
 while (!$feof(fd_r))
 begin
 	eof = 0;
-	#10 trace = $fscanf (fd_r,"%d",command);
-	if (command < 8) 
+	trace = $fscanf (fd_r,"%d %h",command,address);
+	if (trace > 0)
 	begin
-		trace = $fscanf (fd_r,"%h",address);
 		eof = 1;
-		//$display ("\n\ncommand: %d, address: %h",command,address);
 		#10	cache_hit_ratio = (cache_hits/(cache_hits+cache_misses)) * 100;
 		$display ("reads: %0d, writes: %0d, cache_hits: %0d, cache_misses: %0d, cache_hit_ratio: %.3f%%\n",reads,writes,cache_hits,cache_misses,cache_hit_ratio);
-	end
-	else 
-	begin
-		eof = 1;
-		//command = 'dz;
-		address = 'dz;
 	end
 end
 eof = 0;
