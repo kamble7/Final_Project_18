@@ -3,7 +3,7 @@
 //--------------------------------------------------------------------------------------------------------------------------------
 //																	      //
 // Author:		Hemanth Kumar Bolade (bolade@pdx.edu), Samhitha Kankanala (samhitha@pdx.edu), Kiran Kamble (kamble@pdx.edu)           //
-// Last modified:	06-Dec-2022                                                                                                           //
+// Last modified:	07-Dec-2022                                                                                                           //
 //																	      //
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -73,7 +73,7 @@ begin
 	begin
 		eof = 1;
 		#10	cache_hit_ratio = (cache_hits/(cache_hits+cache_misses));
-		$display ("reads: %0d, writes: %0d, cache_hits: %0d, cache_misses: %0d",reads,writes,cache_hits,cache_misses);
+		//$display ("reads: %0d, writes: %0d, cache_hits: %0d, cache_misses: %0d",reads,writes,cache_hits,cache_misses);
 	end
 end
 eof = 0;
