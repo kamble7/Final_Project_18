@@ -223,7 +223,7 @@ begin
 		endcase
 	end
 end
-endtask : read_request_from_L1_data_cache
+endtask : read_request_from_L1_data_or_instruction_cache
 
 //******************************* WRITE TASK ******************************//
 task write_request_from_L1_data_cache(logic [ADDR_BITS-1:0] addr);
