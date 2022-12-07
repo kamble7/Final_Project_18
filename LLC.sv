@@ -70,7 +70,7 @@ begin
 	GetSnoopResult(addr);
 	if (mode == 0)
 	begin
-		$display("\nBusOperation: %s, Address: %h, SnoopResult: %s",bus_op, addr, SnoopResult);
+		$display("BusOperation: %s, Address: %h, SnoopResult: %s",bus_op, addr, SnoopResult);
 	end
 end
 endtask : BusOperation
@@ -93,7 +93,7 @@ task PutSnoopResult(logic [ADDR_BITS-1:0] addr, snp_rslt_t snoop_result);
 begin
 	if (mode == 0)
 begin
-	$display ("PutSnoopResult : Address = %h, snoop_result = %s\n", addr, snoop_result);
+	$display ("PutSnoopResult : Address = %h, snoop_result = %s", addr, snoop_result);
 	end
 end
 endtask : PutSnoopResult
@@ -103,7 +103,7 @@ task MessageToCache(msg_to_cache_t msgL2L1, logic [ADDR_BITS-1:0] addr);
 begin
 	if (mode == 0)
 	begin
-		$display("L2 to L1 message: %s, Address: %h\n",msgL2L1,addr);
+		$display("L2 to L1 message: %s, Address: %h",msgL2L1,addr);
 	end
 end
 endtask : MessageToCache
