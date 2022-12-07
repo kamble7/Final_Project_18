@@ -73,7 +73,7 @@ begin
 	begin
 		eof = 1;
 		#10	cache_hit_ratio = (cache_hits/(cache_hits+cache_misses));
-		//$display ("reads: %0d, writes: %0d, cache_hits: %0d, cache_misses: %0d, cache_hit_ratio: %.2f\n",reads,writes,cache_hits,cache_misses,cache_hit_ratio);
+		$display ("reads: %0d, writes: %0d, cache_hits: %0d, cache_misses: %0d",reads,writes,cache_hits,cache_misses);
 	end
 end
 eof = 0;
